@@ -50,6 +50,7 @@
                 <select id="role" class="form-select">
                   <option value="">All</option>
                   <option value="student">Student</option>
+                  <option value="alumni">Alumni</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
@@ -222,9 +223,29 @@
     function renderUserRow(user) {
       const userId = user._id || user.id;
       const status = user.status || "active";
+      const role = user.role || "student";
       const name = user.name || "Unknown";
       const safeName = safeJs(name);
       const isBlocked = status === "blocked";
+      const isPending = status === "pending";
+
+      /* Status action button */
+      let statusBtn = "";
+      if (isPending) {
+        statusBtn = `<button class="btn btn-success btn-sm" onclick="confirmUserStatus('${userId}', 'active', '${safeName}')">Approve</button>`;
+      } else if (isBlocked) {
+        statusBtn = `<button class="btn btn-success btn-sm" onclick="confirmUserStatus('${userId}', 'active', '${safeName}')">Activate</button>`;
+      } else {
+        statusBtn = `<button class="btn btn-warning btn-sm" onclick="confirmUserStatus('${userId}', 'blocked', '${safeName}')">Block</button>`;
+      }
+
+      /* Role action button — only students can be promoted to alumni */
+      let roleBtn = "";
+      if (role === "student") {
+        roleBtn = `<button class="btn btn-outline-primary btn-sm" onclick="confirmMakeAlumni('${userId}', '${safeName}')">Make Alumni</button>`;
+      } else if (role === "alumni") {
+        roleBtn = `<button class="btn btn-outline-primary btn-sm" onclick="confirmMakeStudent('${userId}', '${safeName}')">Revert to Student</button>`;
+      }
 
       return `
         <tr>
@@ -241,16 +262,14 @@
 
           <td>${escapeHTML(user.department || "-")}</td>
           <td>${escapeHTML(user.batch || "-")}</td>
-          <td><span class="dashboard-tile__badge">${escapeHTML(user.role || "student")}</span></td>
+          <td><span class="dashboard-tile__badge">${escapeHTML(role)}</span></td>
           <td><span class="status-pill ${escapeHTML(status)}">${escapeHTML(status)}</span></td>
           <td>${formatDate(user.createdAt)}</td>
 
           <td class="text-end">
             <div class="d-flex justify-content-end gap-2 flex-wrap">
-              ${isBlocked
-                ? `<button class="btn btn-success btn-sm" onclick="confirmUserStatus('${userId}', 'active', '${safeName}')">Activate</button>`
-                : `<button class="btn btn-warning btn-sm" onclick="confirmUserStatus('${userId}', 'blocked', '${safeName}')">Block</button>`
-              }
+              ${statusBtn}
+              ${roleBtn}
               <button class="btn btn-danger btn-sm" onclick="confirmDeleteUser('${userId}', '${safeName}')">Delete</button>
             </div>
           </td>
@@ -287,6 +306,47 @@
         loadUsers(currentPage);
       } catch (error) {
         showToast(error.message || "Unable to update user status.", "error");
+      }
+    }
+
+    function confirmMakeAlumni(id, name) {
+      confirmAction(
+        `Promote "${name}" to Alumni? They will be able to post jobs and mentor students.`,
+        function () { updateUserRole(id, "alumni"); },
+        {
+          title: "Make Alumni",
+          confirmText: "Make Alumni",
+          cancelText: "Cancel",
+          confirmButtonClass: "btn-primary"
+        }
+      );
+    }
+
+    function confirmMakeStudent(id, name) {
+      confirmAction(
+        `Revert "${name}" back to a Student account?`,
+        function () { updateUserRole(id, "student"); },
+        {
+          title: "Revert to Student",
+          confirmText: "Revert",
+          cancelText: "Cancel",
+          confirmButtonClass: "btn-warning"
+        }
+      );
+    }
+
+    async function updateUserRole(id, role) {
+      try {
+        const data = await apiFetch(`/users/${id}/role`, {
+          method: "PATCH",
+          headers: authHeaders(),
+          body: JSON.stringify({ role })
+        });
+
+        showToast(data.message || `User role changed to ${role}.`, "success");
+        loadUsers(currentPage);
+      } catch (error) {
+        showToast(error.message || "Unable to change user role.", "error");
       }
     }
 

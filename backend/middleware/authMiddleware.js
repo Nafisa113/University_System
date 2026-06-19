@@ -23,6 +23,12 @@ async function authMiddleware(req, res, next) {
       });
     }
 
+    if (user.status === "pending") {
+      return res.status(403).json({
+        message: "Your account is pending admin approval."
+      });
+    }
+
     if (user.status === "blocked") {
       return res.status(403).json({
         message: "Your account has been blocked"

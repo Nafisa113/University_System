@@ -16,6 +16,10 @@ const userRoutes = require("./routes/userRoutes");
 const supportRoutes = require("./routes/supportRoutes");
 const cgpaRoutes = require("./routes/cgpaRoutes");
 const successStoryRoutes = require("./routes/successStoryRoutes");
+const jobRoutes = require("./routes/jobRoutes");
+const alumniRoutes = require("./routes/alumniRoutes");
+const messageRoutes    = require("./routes/messageRoutes");
+const semesterRoutes   = require("./routes/semesterRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -63,6 +67,10 @@ app.use("/api/users", userRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/cgpa", cgpaRoutes);
 app.use("/api/success-stories", successStoryRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/alumni", alumniRoutes);
+app.use("/api/messages",  messageRoutes);
+app.use("/api/semesters", semesterRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

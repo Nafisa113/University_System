@@ -78,6 +78,7 @@ router.post(
       email,
       password: hashedPassword,
       role: "student",
+      status: "pending",
       department,
       batch,
       semester,
@@ -111,12 +112,18 @@ router.post(
       });
     }
 
+   if (user.status === "pending") {
+      return res.status(403).json({
+        message: "Your account is pending admin approval. Please wait."
+      });
+    }
+
     if (user.status === "blocked") {
       return res.status(403).json({
         message: "Your account has been blocked"
       });
     }
-
+    
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {

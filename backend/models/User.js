@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["admin", "student"],
+      enum: ["admin", "student", "alumni"],
       default: "student"
     },
 
@@ -90,8 +90,8 @@ const userSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["active", "blocked"],
-      default: "active"
+      enum: ["active", "blocked", "pending"],
+      default: "pending"
     },
 
     bookmarks: {
@@ -111,6 +111,26 @@ const userSchema = new mongoose.Schema(
 
     resetPasswordExpires: {
       type: Date
+    },
+
+    currentCompany: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 100
+    },
+
+    designation: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 100
+    },
+
+    linkedinProfile: {
+      type: String,
+      default: "",
+      trim: true
     }
   },
   { timestamps: true }

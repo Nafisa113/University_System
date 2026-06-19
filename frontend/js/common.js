@@ -573,12 +573,16 @@ async function renderNavbar(active = "") {
               </a>
             </li>
 
-            <li class="nav-item">
+           <li class="nav-item">
               <a class="nav-link ${active === "notes" ? "active" : ""}" href="view-notes.html">Notes</a>
             </li>
 
             <li class="nav-item">
               <a class="nav-link ${active === "pyq" ? "active" : ""}" href="view-pyq.html">PYQ</a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link ${active === "alumni" ? "active" : ""}" href="alumni-network.html">Alumni</a>
             </li>
 
             ${showDashboardLink ? `
@@ -678,7 +682,13 @@ function renderSidebar(active = "") {
     ["recent-activity.html", "activity", "Recent Activity"]
   ];
 
-  const links = user?.role === "admin" ? adminLinks : studentLinks;
+  const alumniLinks = [
+    ["alumni-network.html", "alumni", "Alumni Network"],
+    ["alumni-messages.html", "messages", "Messages"],
+    ["profile.html", "profile", "Profile"]
+  ];
+
+  const links = user?.role === "admin" ? adminLinks : user?.role === "alumni" ? alumniLinks : studentLinks;
 
   root.innerHTML = `
     <div class="side-card">

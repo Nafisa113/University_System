@@ -239,7 +239,7 @@ router.patch(
   asyncHandler(async (req, res) => {
     const { status } = req.body;
 
-    if (!["active", "blocked"].includes(status)) {
+    if (!["active", "blocked", "pending"].includes(status)) {
       return res.status(400).json({ message: "Invalid user status" });
     }
 
@@ -256,6 +256,35 @@ router.patch(
     }
 
     res.json({ message: `User ${status} successfully`, user });
+  })
+);
+
+router.patch(
+  "/:id/role",
+  authMiddleware,
+  adminMiddleware,
+  asyncHandler(async (req, res) => {
+    const { role } = req.body;
+
+    if (!["student", "alumni", "admin"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    if (req.params.id === req.user.id) {
+      return res.status(400).json({ message: "You cannot change your own role" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true }
+    ).select("-password -resetPasswordToken -resetPasswordCode -resetPasswordExpires");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: `User role changed to ${role} successfully`, user });
   })
 );
 
